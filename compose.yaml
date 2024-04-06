@@ -1,0 +1,24 @@
+services:
+  db:
+    image: mysql:5.7
+    command:
+      [
+        "--character-set-server=utf8mb4",
+        "--collation-server=utf8mb4_general_ci",
+        "--init-connect='SET NAMES UTF8;'",
+        "--innodb-flush-log-at-trx-commit=0",
+      ]
+    ports:
+      - "3306:3306"
+    restart: always
+    healthcheck:
+      test: "mysql -uroot -p12345678 -e 'select 1;'"
+      interval: 1s
+      retries: 20
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: gotext
+      LANG: C.UTF-8
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
