@@ -10,11 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mahl/gotext/db"
 	m "github.com/mahl/gotext/models"
+	ut "github.com/mahl/gotext/utils"
 )
-
-func notFoundCheck(u *m.User) bool {
-	return u.Name == ""
-}
 
 func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	type UsersResponse struct {
@@ -41,7 +38,7 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.DB.First(u, id)
-	if notFoundCheck(u) {
+	if ut.NotFoundCheck(u) {
 		message := fmt.Sprintf("User with id %v not found", id)
 		response := &m.Message{Message: message}
 		json.NewEncoder(w).Encode(response)
@@ -97,7 +94,7 @@ func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := &m.User{}
 
 	db.DB.First(&user, id)
-	if notFoundCheck(user) {
+	if ut.NotFoundCheck(user) {
 		w.WriteHeader(http.StatusNotFound)
 		message := "Error processing request"
 		response := &m.Message{Message: message}
@@ -118,7 +115,7 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	userInDB := &m.User{}
 	db.DB.First(&userInDB, id)
-	if notFoundCheck(userInRequest) {
+	if ut.NotFoundCheck(userInRequest) {
 		w.WriteHeader(http.StatusNotFound)
 		message := "Error processing request"
 		response := &m.Message{Message: message}

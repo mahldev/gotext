@@ -29,6 +29,6 @@ func (u *User) HashPassword() {
 }
 
 func (u *User) PasswordIsCorrect(password string) bool {
-	hashed, _ := bcrypt.GenerateFromPassword([]byte(password), 8)
-	return string(hashed) == u.Password
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	return err == nil
 }

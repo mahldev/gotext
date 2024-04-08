@@ -2,7 +2,6 @@ package utils
 
 import (
 	"math/rand"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -36,8 +35,4 @@ func ReadWordFileN(n uint64) []string {
 	copy(result, lines[:n])
 
 	return result
-}
-
-func EnableCORS(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
