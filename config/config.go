@@ -1,8 +1,11 @@
 package config
 
-import m "github.com/mahl/gotext/models"
+type config struct {
+	Port      string
+	SecretKey []byte
+}
 
-var Config = m.Config{
+var Config = &config{
 	Port:      ":8080",
 	SecretKey: []byte("my_secret_key"),
 }

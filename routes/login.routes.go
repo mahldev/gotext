@@ -5,21 +5,20 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt"
 	c "github.com/mahl/gotext/config"
 	"github.com/mahl/gotext/db"
 	m "github.com/mahl/gotext/models"
 	ut "github.com/mahl/gotext/utils"
 )
 
-func createToken(userId string) (string, error) {
-	secret := c.Config.SecretKey
+func CreateToken(userId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userId,
 		"exp":    time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	tokenString, err := token.SignedString(secret)
+	tokenString, err := token.SignedString(c.Config.SecretKey)
 	if err != nil {
 		return "", err
 	}
@@ -47,7 +46,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := createToken(u.ID.String())
+	token, err := CreateToken(u.ID.String())
 	if err != nil {
 		response := &m.Message{Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
