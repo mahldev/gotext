@@ -1,4 +1,4 @@
-package routes
+package services
 
 import (
 	"encoding/json"
@@ -8,7 +8,6 @@ import (
 
 	m "github.com/mahl/gotext/models"
 	re "github.com/mahl/gotext/resources"
-	u "github.com/mahl/gotext/utils"
 )
 
 func parseLang(language string) (string, bool) {
@@ -34,7 +33,7 @@ func ParseParams(r *http.Request) (*Params, error) {
 	langStr := r.URL.Query().Get("lang")
 	lang, ok := parseLang(langStr)
 	if !ok {
-		return nil, errors.New("Invalid lang")
+		return nil, errors.New("invalid lang")
 	}
 
 	nStr := r.URL.Query().Get("n")
@@ -49,14 +48,13 @@ func ParseParams(r *http.Request) (*Params, error) {
 func GetTextHandler(w http.ResponseWriter, r *http.Request) {
 	params, err := ParseParams(r)
 	if err != nil {
-		response := &m.Message{Message: err.Error()}
-		json.NewEncoder(w).Encode(response)
+		WriteError(w, err.Error())
 		return
 	}
 
 	words := re.ReadWordFileN(params.N, params.Lang)
 	response := &m.Text{Words: words}
-	u.EnableCORS(&w)
+	EnableCORS(&w)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }

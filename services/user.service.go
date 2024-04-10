@@ -1,4 +1,4 @@
-package routes
+package services
 
 import (
 	"encoding/json"
@@ -10,7 +10,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mahl/gotext/db"
 	m "github.com/mahl/gotext/models"
-	ut "github.com/mahl/gotext/utils"
 )
 
 func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,17 +30,13 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	u := &m.User{}
 	id, err := uuid.Parse(params["id"])
 	if err != nil {
-		message := "Invalid uuid"
-		response := &m.Message{Message: message}
-		json.NewEncoder(w).Encode(response)
+		WriteError(w, "Invalid uuid")
 		return
 	}
 
 	db.DB.First(u, id)
-	if ut.NotFoundCheck(u) {
-		message := fmt.Sprintf("User with id %v not found", id)
-		response := &m.Message{Message: message}
-		json.NewEncoder(w).Encode(response)
+	if NotFoundCheck(u) {
+		WriteError(w, fmt.Sprintf("User with id %v not found", id))
 		return
 	}
 
@@ -55,17 +50,13 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	if u.IsValidUsername() {
 		w.WriteHeader(http.StatusBadRequest)
-		message := "Invalid username"
-		response := &m.Message{Message: message}
-		json.NewEncoder(w).Encode(response)
+		WriteError(w, "Invalid username")
 		return
 	}
 
 	if u.IsValidPassword() {
 		w.WriteHeader(http.StatusBadRequest)
-		message := "Invalid password"
-		response := &m.Message{Message: message}
-		json.NewEncoder(w).Encode(response)
+		WriteError(w, "Invalid password")
 		return
 	}
 
@@ -79,8 +70,6 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 	err := createdUser.Error
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		response := &m.Message{Message: err.Error()}
-		json.NewEncoder(w).Encode(response)
 		return
 	}
 
@@ -94,11 +83,9 @@ func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := &m.User{}
 
 	db.DB.First(&user, id)
-	if ut.NotFoundCheck(user) {
+	if NotFoundCheck(user) {
 		w.WriteHeader(http.StatusNotFound)
-		message := "Error processing request"
-		response := &m.Message{Message: message}
-		json.NewEncoder(w).Encode(response)
+		WriteError(w, "Error processing request")
 		return
 	}
 
@@ -115,20 +102,16 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	userInDB := &m.User{}
 	db.DB.First(&userInDB, id)
-	if ut.NotFoundCheck(userInRequest) {
+	if NotFoundCheck(userInRequest) {
 		w.WriteHeader(http.StatusNotFound)
-		message := "Error processing request"
-		response := &m.Message{Message: message}
-		json.NewEncoder(w).Encode(response)
+		WriteError(w, "Error processing request")
 		return
 	}
 
 	userIdUint, err := uuid.Parse(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		message := "Error processing id request"
-		response := &m.Message{Message: message}
-		json.NewEncoder(w).Encode(response)
+		WriteError(w, "Error processing id request")
 		return
 	}
 
