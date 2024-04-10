@@ -41,43 +41,33 @@ func userIsAuthenticated(r *http.Request) bool {
 	return expTime.Compare(time.Now()) >= 1
 }
 
-func Middleware(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		if r.URL.Path == "/login" {
-			h.ServeHTTP(w, r)
-			return
-		}
-
-		if strings.Split(r.URL.Path, "/")[1] == "text" {
-			h.ServeHTTP(w, r)
-			return
-		}
-
+func Auth(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
 		if !userIsAuthenticated(r) {
 			message := "Unauthorized"
 			response := &map[string]string{"message": message}
 			json.NewEncoder(w).Encode(response)
 			return
 		}
+	}
 
-		h.ServeHTTP(w, r)
-	})
+	return http.HandlerFunc(fn)
 }
 
 func InitServer() {
 	r := mux.NewRouter()
-	r.Use(Middleware)
+
+	protected := r.PathPrefix("/admin").Subrouter()
+	protected.Use(Auth)
+	protected.HandleFunc("/users", routes.GetUsersHandler).Methods(http.MethodGet)
+	protected.HandleFunc("/users", routes.PostUserHandler).Methods(http.MethodPost)
+	protected.HandleFunc("/users/{id}", routes.GetUserHandler).Methods(http.MethodGet)
+	protected.HandleFunc("/users/{id}", routes.UpdateUserHandler).Methods(http.MethodPut)
+	protected.HandleFunc("/users/{id}", routes.DeleteUserHandler).Methods(http.MethodDelete)
 
 	r.HandleFunc("/", routes.HomeHandler)
-	r.HandleFunc("/users", routes.GetUsersHandler).Methods("GET")
-	r.HandleFunc("/users", routes.PostUserHandler).Methods("POST")
-	r.HandleFunc("/users/{id}", routes.GetUserHandler).Methods("GET")
-	r.HandleFunc("/users/{id}", routes.UpdateUserHandler).Methods("UPDATE")
-	r.HandleFunc("/users/{id}", routes.DeleteUserHandler).Methods("DELETE")
-	r.HandleFunc("/text", routes.GetAllTextHandler).Methods("GET")
-	r.HandleFunc("/text/{n}", routes.GetTextHandler).Methods("GET")
-	r.HandleFunc("/login", routes.LoginHandler).Methods("POST")
+	r.HandleFunc("/text", routes.GetTextHandler).Methods(http.MethodGet)
+	r.HandleFunc("/login", routes.LoginHandler).Methods(http.MethodPost)
 
 	log.Fatal(http.ListenAndServe(c.Config.Port, r))
 }
