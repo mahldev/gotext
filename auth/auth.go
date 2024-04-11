@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	c "github.com/mahl/gotext/configs"
+	c "github.com/mahl/gotext/config"
 )
 
 var SecretKey = c.Config.AuthSecretKey
@@ -31,9 +31,12 @@ func Auth(next http.Handler) http.Handler {
 		if !userIsAuthenticated(r) {
 			message := "Unauthorized"
 			response := &map[string]string{"message": message}
+			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(response)
 			return
 		}
+
+		next.ServeHTTP(w, r)
 	}
 
 	return http.HandlerFunc(fn)
