@@ -10,4 +10,6 @@ func Init() {
 	api.InitApi()
 }
 
-func main() { Init() }
+func main() {
+	Init()
+}

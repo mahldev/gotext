@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	c "github.com/mahl/gotext/configs"
+	c "github.com/mahl/gotext/config"
 	m "github.com/mahl/gotext/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -15,11 +15,11 @@ var DB *gorm.DB
 func AutoMigrateTables() {
 	err := DB.AutoMigrate(&m.User{})
 	if err != nil {
-		log.Fatalf("Error migrating User table: %s\n", err.Error())
+		log.Fatalf("[ERROR] Error migrating User table: %s\n", err.Error())
 		return
 	}
 
-	log.Println("Tables migrations successful.")
+	log.Println("[INFO] Tables migrations successful.")
 }
 
 func InitDBConnection() {
@@ -40,5 +40,5 @@ func InitDBConnection() {
 
 	AutoMigrateTables()
 
-	log.Println("DB Connection successful.")
+	log.Println("[INFO] DB connection successful.")
 }
