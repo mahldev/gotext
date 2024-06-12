@@ -19,6 +19,12 @@ func AutoMigrateTables() {
 		return
 	}
 
+	err = DB.AutoMigrate(&m.TestStats{})
+	if err != nil {
+		log.Fatalf("[ERROR] Error migrating Test Stats table: %s\n", err.Error())
+		return
+	}
+
 	log.Println("[INFO] Tables migrations successful.")
 }
 

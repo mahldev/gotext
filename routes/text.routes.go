@@ -54,7 +54,6 @@ func GetTextHandler(w http.ResponseWriter, r *http.Request) {
 
 	words := re.ReadWordFileN(params.N, params.Lang)
 	response := &m.Text{Words: words}
-	EnableCORS(&w)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }

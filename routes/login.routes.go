@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,7 +12,7 @@ import (
 	m "github.com/mahl/gotext/models"
 )
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	u := &m.User{}
 	json.NewDecoder(r.Body).Decode(u)
 
@@ -30,8 +31,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	timeNow := time.Now()
 	u.ID = uuid.New()
 	u.HashPassword()
-	u.UdpateAt = &timeNow
+	u.UpdateAt = &timeNow
 	u.CreatedAt = &timeNow
+	u.Level = 1
 
 	createdUser := db.DB.Create(u)
 	err := createdUser.Error
@@ -47,7 +49,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := map[string]string{"token": token}
+	response := map[string]string{
+		"level": strconv.FormatInt(u.Level, 10),
+		"token": token,
+	}
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
 }

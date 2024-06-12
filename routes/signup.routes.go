@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/mahl/gotext/auth"
 	"github.com/mahl/gotext/db"
@@ -10,7 +11,7 @@ import (
 	m "github.com/mahl/gotext/models"
 )
 
-func SignupHandler(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	reqUser := &m.User{}
 	json.NewDecoder(r.Body).Decode(reqUser)
 	u := &m.User{}
@@ -32,6 +33,9 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := map[string]string{"token": token}
+	response := map[string]string{
+		"level": strconv.FormatInt(u.Level, 10),
+		"token": token,
+	}
 	json.NewEncoder(w).Encode(response)
 }

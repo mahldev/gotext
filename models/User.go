@@ -9,9 +9,11 @@ import (
 
 type User struct {
 	CreatedAt *time.Time `json:"createAt"`
-	UdpateAt  *time.Time `json:"updateAt"`
+	UpdateAt  *time.Time `json:"updateAt"`
 	Name      string     `gorm:"unique" json:"username"`
 	Password  string     `json:"password"`
+	Email     string     `json:"email"`
+	Level     int64      `json:"level"`
 	ID        uuid.UUID  `gorm:"primaryKey;type:char(36)" json:"id"`
 }
 

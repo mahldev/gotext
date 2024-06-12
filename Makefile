@@ -15,4 +15,3 @@ docker-up:
 
 docker-down:
 	@cd ./config && docker compose down
-

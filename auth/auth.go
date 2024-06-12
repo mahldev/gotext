@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -42,27 +43,49 @@ func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func userIsAuthenticated(r *http.Request) bool {
+func CorsMiddelware(next http.Handler) http.Handler {
 
+	fn := func(w http.ResponseWriter, r *http.Request) {
+
+		next.ServeHTTP(w, r)
+	}
+
+	return http.HandlerFunc(fn)
+}
+
+func GetClaims(r *http.Request) (*jwt.MapClaims, error) {
 	authorizationHeader := r.Header.Get("Authorization")
 	if authorizationHeader == "" {
-		return false
+		return nil, errors.New("authorization header is missing")
 	}
 
 	tokenParts := strings.Split(authorizationHeader, " ")
 	if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-		return false
+		return nil, errors.New("authorization header format must be Bearer {token}")
 	}
 	tokenString := tokenParts[1]
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return SecretKey, nil
 	})
-	if err != nil || !token.Valid {
-		return false
+	if err != nil {
+		return nil, errors.New("failed to parse token")
+	}
+	if !token.Valid {
+		return nil, errors.New("token is invalid")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
+		return nil, errors.New("failed to parse token claims")
+	}
+
+	return &claims, nil
+}
+
+func userIsAuthenticated(r *http.Request) bool {
+	claims, err := GetClaims(r)
+	if err != nil {
+		println(err.Error())
 		return false
 	}
 
